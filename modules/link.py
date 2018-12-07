@@ -11,6 +11,7 @@ import validators
 from bs4 import BeautifulSoup
 from .utils import multi_thread
 from .color import color
+from .proxy import proxy_get
 
 def get_emails(node):
     """Finds all emails associated with node
@@ -54,8 +55,7 @@ class LinkNode:
         link (str): link to be used as node
     """
 
-    def __init__(self, link):
-        # If link has invalid form, throw an error
+    def __init__(self, link, *, tor=True, tld=False):
         if not self.valid_link(link):
             raise ValueError("Invalid link format.")
 
@@ -65,11 +65,11 @@ class LinkNode:
 
         # Attempts to connect to link, throws an error if link is unreachable
         try:
-            self.response = requests.get(link)
-        except (requests.exceptions.ChunkedEncodingError,
-                requests.exceptions.HTTPError,
-                requests.exceptions.ConnectionError,
-                ConnectionError) as err:
+            if tor:
+                self.response = proxy_get(link)
+            else:
+                self.response = requests.get(link)
+        except (requests.exceptions.ChunkedEncodingError, requests.exceptions.HTTPError, requests.exceptions.ConnectionError, ConnectionError) as err:
             raise err
 
         self._node = BeautifulSoup(self.response.text, 'html.parser')

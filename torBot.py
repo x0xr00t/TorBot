@@ -2,8 +2,6 @@
 MAIN MODULE
 """
 import argparse
-import socket
-import socks
 
 from requests.exceptions import HTTPError
 
@@ -14,6 +12,7 @@ from modules.link import LinkNode
 from modules.updater import updateTor
 from modules.savefile import saveJson
 from modules.info import execute_all
+from modules.ws_server import start_wsserver
 
 # GLOBAL CONSTS
 LOCALHOST = "127.0.0.1"
@@ -21,45 +20,6 @@ DEFPORT = 9050
 
 # TorBot VERSION
 __VERSION = "1.3.1"
-
-
-def connect(address, port):
-    """ Establishes connection to port
-
-    Assumes port is bound to localhost, if host that port is bound to changes
-    then change the port
-
-    Args:
-        address: address for port to bound to
-        port: Establishes connect to this port
-    """
-
-    if address and port:
-        socks.set_default_proxy(socks.PROXY_TYPE_SOCKS5, address, port)
-    elif address:
-        socks.set_default_proxy(socks.PROXY_TYPE_SOCKS5, address, DEFPORT)
-    elif port:
-        socks.set_default_proxy(socks.PROXY_TYPE_SOCKS5, LOCALHOST, port)
-    else:
-        socks.set_default_proxy(socks.PROXY_TYPE_SOCKS5, LOCALHOST, DEFPORT)
-
-    socket.socket = socks.socksocket  # Monkey Patch our socket to tor socket
-
-    def getaddrinfo(*args):
-        """
-        Overloads socket function for std socket library
-        Check socket.getaddrinfo() documentation to understand parameters.
-        Simple description below:
-        argument - explanation (actual value)
-        socket.AF_INET - the type of address the socket can speak to (IPV4)
-        sock.SOCK_STREAM - creates a stream connecton rather than packets
-        6 - protocol being used is TCP
-        Last two arguments should be a tuple containing the address and port
-        """
-        return [(socket.AF_INET, socket.SOCK_STREAM, 6,
-                 '', (args[0], args[1]))]
-    socket.getaddrinfo = getaddrinfo
-
 
 def header():
     """
@@ -118,6 +78,8 @@ def get_args():
                         help="Visualizes tree of data gathered.")
     parser.add_argument("-d", "--download", action="store_true",
                         help="Downloads tree of data gathered.")
+    parser.add_argument("--server", action="store_true",
+                        help="Start TorBot WebSocket server.")
     return parser.parse_args()
 
 
@@ -126,7 +88,8 @@ def main():
     TorBot's Core
     """
     args = get_args()
-    connect(args.ip, args.port)
+    if args.server:
+        start_wsserver()
 
     # If flag is -v, --update, -q/--quiet then user only runs that operation
     # because these are single flags only
@@ -138,6 +101,10 @@ def main():
         exit()
     if not args.quiet:
         header()
+    try:
+        node = LinkNode(args.url, tld=args.extension)
+    except (ValueError, HTTPError, ConnectionError) as err:
+        raise err
     # If url flag is set then check for accompanying flag set. Only one
     # additional flag can be set with -u/--url flag
     if args.url:
