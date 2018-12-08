@@ -19,6 +19,15 @@ function handleLinks(msg) {
     ReactDOM.render(<Links links={links}/>, document.getElementById('root'));
 }
 
+function handleInfo(msg) {
+    let info = JSON.parse(msg.data);
+    if (info.error) {
+        console.error(info.error);
+        return;
+    }
+    ReactDOM.render(<Info info={info}/>, document.getElementById('root'));
+}
+
 function setupWebsocket(host) {
     websocket = new WebSocket(host);
     websocket.onerror = (error) => {
@@ -75,6 +84,10 @@ class Home extends React.Component {
         switch (this.state.action) {
             case 'get_links':
                 websocket.onmessage = handleLinks;
+                websocket.send(JSON.stringify(msg));
+                break;
+            case 'get_info':
+                websocket.onmessage = handleInfo;
                 websocket.send(JSON.stringify(msg));
                 break;
         }

@@ -5,7 +5,6 @@ class Info extends React.Component {
         super(props);
         this.state = {
             info: props.info,
-            websocket: props.websocket
         };
     }
 
@@ -13,7 +12,11 @@ class Info extends React.Component {
         return (
             <React.Fragment>
                 <h1>INFO</h1>
-                <div>{this.state.info}</div>
+                    {
+                        Object.keys(this.state.info).map((key, i) => {
+                            return <li key={i}>{key}: {this.state.info[key]}</li>;
+                        })
+                    }
             </React.Fragment>
         );
     }
