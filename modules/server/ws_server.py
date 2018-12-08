@@ -14,9 +14,8 @@ import requests
 from bs4 import BeautifulSoup
 
 # Local Imports
-from .link import LinkNode
-from .proxy import proxy_get, proxy_head
-
+from ..link import LinkNode
+from ..proxy import proxy_get, proxy_head
 
 # Setting up logging format
 # Logs include {time} {loglevel} {logmessage}
