@@ -5,6 +5,26 @@ import Links from './links';
 import Info from './info';
 import './home.css';
 
+var websocket;
+var links = [];
+
+
+function handleLinks(msg) {
+    let link = JSON.parse(msg.data);
+    if (link.error) {
+        console.error(link.error);
+        return;
+    }
+    links.push(link);
+    ReactDOM.render(<Links links={links}/>, document.getElementById('root'));
+}
+
+function setupWebsocket(host) {
+    websocket = new WebSocket(host);
+    websocket.onerror = (error) => {
+        console.error(error);
+    };
+}
 /**
  * Home page of TorBot 
  * @class Home
@@ -12,11 +32,12 @@ import './home.css';
 class Home extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {url: '', action: 'get_links'};
+        this.state = {url: '', action: 'get_links', submit: false};
         this.onSubmit = this.onSubmit.bind(this);
         this.onUrlChange = this.onUrlChange.bind(this);
         this.onActionChange = this.onActionChange.bind(this);
         this.onSelection = this.onSelection.bind(this);
+        setupWebsocket('ws://localhost:8080');
     }
 
     /**
@@ -47,15 +68,17 @@ class Home extends React.Component {
      */
     onSubmit(event) {
         event.preventDefault();
+        let msg = {
+                url: this.state.url,
+                action: this.state.action
+        };
         switch (this.state.action) {
             case 'get_links':
-                ReactDOM.render(<Links host='localhost' port='8080' url={this.state.url}/>, document.getElementById('root')); 
-                break;
-            case 'get_info':
-                ReactDOM.render(<Info host='localhost' port='8080' url={this.state.url}/>, document.getElementById('root'));
+                websocket.onmessage = handleLinks;
+                websocket.send(JSON.stringify(msg));
                 break;
         }
-    }
+}
 
     onSelection(event) {
         this.setState({action: event.target.value});
@@ -77,13 +100,11 @@ class Home extends React.Component {
                         onChange={this.onSelection} 
                         type="checkbox" 
                         value="get_links" 
-                        checked={this.state.action === 'get_links'}
                     /> Get Links<br/> 
                     <input 
                         onChange={this.onSelection} 
                         type="checkbox" 
                         value="get_info" 
-                        checked={this.state.action === 'get_info'}
                     /> Get Info<br/>
                 </form>
             </React.Fragment>
