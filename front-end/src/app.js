@@ -1,5 +1,6 @@
 import React from 'react';
 import Home from './components/home';
+import MaterialHome from './components/materialhome';
 import './app.css';
 
 /**
@@ -8,7 +9,8 @@ import './app.css';
  */
 class App extends React.Component {
     render() {
-        return <Home/>;
+        return <MaterialHome/>;
+        //return <Home/>;
     }
 }
 
