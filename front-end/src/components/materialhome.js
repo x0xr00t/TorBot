@@ -25,28 +25,42 @@ const StyledSelect = withStyles({
     }
 })(Select);
 
+const LINKS = 'GET_LINKS';
+const INFO = 'GET_INFORMATION';
+
 class MaterialHome extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {option: 'GET_LINKS'};
-        this.handleChange = this.handleChange.bind(this);
+        this.state = {option: LINKS, url: ''};
+        this.handleTextChange = this.handleTextChange.bind(this);
+        this.handleSelectChange = this.handleSelectChange.bind(this);
+        this.handleSubmit = this.handleSubmit.bind(this);
     }
 
-    handleChange(event) {
+    handleSubmit(event) {
+        if (this.state.url === '') return;
+        console.log(this.state);
+    }
+    
+    handleTextChange(event) {
+        this.setState({url: event.target.value});
+    }
+
+    handleSelectChange(event) {
         this.setState({option: event.target.value});
     }
 
     render() {
         return (
             <form>
-                <StyledTextField label="URL"/>
+                <StyledTextField label="URL" onChange={this.handleTextChange}/>
                 <br/>
-                <StyledSelect value={this.state.option} onChange={this.handleChange}>
-                    <MenuItem value={'GET_LINKS'}>Get Links</MenuItem>
-                    <MenuItem value={'GET_INFORMATION'}>Get Information</MenuItem>
+                <StyledSelect value={this.state.option} onChange={this.handleSelectChange}>
+                    <MenuItem value={LINKS}>Get Links</MenuItem>
+                    <MenuItem value={INFO}>Get Information</MenuItem>
                 </StyledSelect>
                 <br/>
-                <Button type="submit" variant="contained" color="primary">
+                <Button onClick={this.handleSubmit} variant="contained" color="primary">
                     Submit
                 </Button>
             </form>
