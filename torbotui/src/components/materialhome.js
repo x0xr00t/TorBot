@@ -39,6 +39,29 @@ class MaterialHome extends React.Component {
 
     handleSubmit(event) {
         if (this.state.url === '') return;
+        let req;
+        switch (this.state.option) {
+            case LINKS:
+                req = new XMLHttpRequest();
+                req.open("GET", "http://127.0.0.1:3000/links");
+                req.onreadystatechange = () => {
+                    if (req.readyState === 4 && req.status === 200) {
+                        console.log(req.responseText);
+                    }
+                };
+                req.send();
+                break;
+            case INFO:
+                req = new XMLHttpRequest();
+                req.open("GET", "http://127.0.0.1:3000/info");
+                req.onreadystatechange = () => {
+                    if (req.readyState === 4 && req.status === 200) {
+                        console.log(req.responseText);
+                    }
+                };
+                req.send();
+                break;
+        }
     }
     
     handleTextChange(event) {
