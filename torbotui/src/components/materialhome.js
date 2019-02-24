@@ -39,7 +39,6 @@ class MaterialHome extends React.Component {
 
     handleSubmit(event) {
         if (this.state.url === '') return;
-        console.log(this.state);
     }
     
     handleTextChange(event) {
@@ -53,7 +52,7 @@ class MaterialHome extends React.Component {
     render() {
         return (
             <form>
-                <StyledTextField label="URL" onChange={this.handleTextChange}/>
+                <StyledTextField label="URL" onChange={this.handleTextChange} fullWidth={true}/>
                 <br/>
                 <StyledSelect value={this.state.option} onChange={this.handleSelectChange}>
                     <MenuItem value={LINKS}>Get Links</MenuItem>
