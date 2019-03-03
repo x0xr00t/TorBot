@@ -39,11 +39,10 @@ class MaterialHome extends React.Component {
 
     handleSubmit(event) {
         if (this.state.url === '') return;
-        let req;
+        const req = new XMLHttpRequest();
         switch (this.state.option) {
             case LINKS:
-                req = new XMLHttpRequest();
-                req.open("POST", "http://127.0.0.1:3000/links");
+                req.open('POST', 'http://127.0.0.1:3000/links');
                 req.onreadystatechange = () => {
                     if (req.readyState === 4 && req.status === 200) {
                         console.log(req.responseText);
@@ -52,8 +51,7 @@ class MaterialHome extends React.Component {
                 req.send(JSON.stringify(this.state));
                 break;
             case INFO:
-                req = new XMLHttpRequest();
-                req.open("POST", "http://127.0.0.1:3000/info");
+                req.open('POST', 'http://127.0.0.1:3000/info');
                 req.onreadystatechange = () => {
                     if (req.readyState === 4 && req.status === 200) {
                         console.log(req.responseText);

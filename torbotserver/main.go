@@ -9,10 +9,10 @@ import (
 	"golang.org/x/net/proxy"
 )
 
-var client = createTorClient("tcp", "127.0.0.1:9050")
+var client = createTorClient("tcp", "127.0.0.1", "9050")
 
-func createTorClient(protocol string, address string) *http.Client {
-	dialer, err := proxy.SOCKS5(protocol, address, nil, proxy.Direct)
+func createTorClient(protocol string, address string, port string) *http.Client {
+	dialer, err := proxy.SOCKS5(protocol, address+":"+port, nil, proxy.Direct)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -32,14 +32,24 @@ type State struct {
 	Option string `json::option,omitempty`
 }
 
-func getInfoHandler(req *http.Request) (int, string) {
+func getInfoHandler(req *http.Request, writer http.ResponseWriter) (int, string) {
 	currentState := State{}
 	decoder := json.NewDecoder(req.Body)
 	err := decoder.Decode(&currentState)
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Printf("%+v", currentState)
+	resp, err := client.Head(currentState.Url)
+	if err != nil {
+		return 404, err.Error()
+	}
+	log.Print(resp.Status)
+	buffer := make([]byte, 1024)
+	_, err = resp.Body.Read(buffer)
+	if err != nil {
+		log.Fatal(err)
+	}
+	print(string(buffer))
 	return 200, "GET INFO"
 }
 
