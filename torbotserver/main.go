@@ -43,7 +43,6 @@ func getInfoHandler(req *http.Request, writer http.ResponseWriter) (int, string)
 	if err != nil {
 		return 404, err.Error()
 	}
-	log.Print(resp.Status)
 	buffer := make([]byte, 1024)
 	_, err = resp.Body.Read(buffer)
 	if err != nil {
