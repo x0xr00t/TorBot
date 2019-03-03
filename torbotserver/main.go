@@ -33,9 +33,9 @@ type State struct {
 }
 
 func getInfoHandler(req *http.Request, writer http.ResponseWriter) (int, string) {
-	currentState := State{}
+	currentState := new(State)
 	decoder := json.NewDecoder(req.Body)
-	err := decoder.Decode(&currentState)
+	err := decoder.Decode(currentState)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -43,13 +43,8 @@ func getInfoHandler(req *http.Request, writer http.ResponseWriter) (int, string)
 	if err != nil {
 		return 404, err.Error()
 	}
-	buffer := make([]byte, 1024)
-	_, err = resp.Body.Read(buffer)
-	if err != nil {
-		log.Fatal(err)
-	}
-	print(string(buffer))
-	return 200, "GET INFO"
+	log.Print(resp.Header)
+	return resp.StatusCode, resp.Status
 }
 
 func main() {
