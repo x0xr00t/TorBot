@@ -45,7 +45,8 @@ class MaterialHome extends React.Component {
                 req.open('POST', 'http://127.0.0.1:3000/links');
                 req.onreadystatechange = () => {
                     if (req.readyState === 4 && req.status === 200) {
-                        console.log(req.responseText);
+                        const response = JSON.parse(req.responseText);
+                        console.log(response);
                     }
                 };
                 req.send(JSON.stringify(this.state));
@@ -54,7 +55,8 @@ class MaterialHome extends React.Component {
                 req.open('POST', 'http://127.0.0.1:3000/info');
                 req.onreadystatechange = () => {
                     if (req.readyState === 4 && req.status === 200) {
-                        console.log(req.responseText);
+                        const response = JSON.parse(req.responseText);
+                        console.log(response);
                     }
                 };
                 req.send(JSON.stringify(this.state));

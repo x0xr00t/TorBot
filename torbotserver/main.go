@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/go-martini/martini"
+	"github.com/martini-contrib/render"
 	"golang.org/x/net/proxy"
 )
 
@@ -32,7 +33,7 @@ type State struct {
 	Option string `json::option,omitempty`
 }
 
-func getInfoHandler(req *http.Request, writer http.ResponseWriter) (int, string) {
+func getInfoHandler(req *http.Request, r render.Render) {
 	currentState := new(State)
 	decoder := json.NewDecoder(req.Body)
 	err := decoder.Decode(currentState)
@@ -41,15 +42,16 @@ func getInfoHandler(req *http.Request, writer http.ResponseWriter) (int, string)
 	}
 	resp, err := client.Head(currentState.Url)
 	if err != nil {
-		return 404, err.Error()
+		r.JSON(http.StatusInternalServerError, "Error finding url")
+	} else {
+		r.JSON(resp.StatusCode, resp.Header)
 	}
-	log.Print(resp.Header)
-	return resp.StatusCode, resp.Status
 }
 
 func main() {
 	martini.Env = martini.Prod
 	m := martini.Classic()
+	m.Use(render.Renderer())
 	m.Post("/links", getLinksHandler)
 	m.Post("/info", getInfoHandler)
 	m.Run()
