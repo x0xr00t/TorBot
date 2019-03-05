@@ -5,6 +5,7 @@ import TextField from '@material-ui/core/TextField';
 import { withStyles } from '@material-ui/core/styles';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
+import MaterialInfo from './materialinfo.js';
 import './materialhome.css';
 
 const StyledTextField = withStyles({
@@ -31,13 +32,14 @@ const INFO = 'GET_INFORMATION';
 class MaterialHome extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {option: LINKS, url: ''};
+        this.state = {option: LINKS, url: '', info: null, submit: false};
         this.handleTextChange = this.handleTextChange.bind(this);
         this.handleSelectChange = this.handleSelectChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
     }
 
     handleSubmit(event) {
+        event.preventDefault();
         if (this.state.url === '') return;
         const req = new XMLHttpRequest();
         switch (this.state.option) {
@@ -56,6 +58,8 @@ class MaterialHome extends React.Component {
                 req.onreadystatechange = () => {
                     if (req.readyState === 4 && req.status === 200) {
                         const response = JSON.parse(req.responseText);
+                        this.setState({info: response});
+                        this.setState({submit: true});
                         console.log(response);
                     }
                 };
@@ -73,20 +77,28 @@ class MaterialHome extends React.Component {
     }
 
     render() {
-        return (
-            <form>
-                <StyledTextField label="URL" onChange={this.handleTextChange} fullWidth={true}/>
-                <br/>
-                <StyledSelect value={this.state.option} onChange={this.handleSelectChange}>
-                    <MenuItem value={LINKS}>Get Links</MenuItem>
-                    <MenuItem value={INFO}>Get Information</MenuItem>
-                </StyledSelect>
-                <br/>
-                <Button onClick={this.handleSubmit} variant="contained" color="primary">
-                    Submit
-                </Button>
-            </form>
-        );
+        if (!this.state.submit) {
+            return (
+                <form>
+                    <StyledTextField label="URL" onChange={this.handleTextChange} fullWidth={true}/>
+                    <br/>
+                    <StyledSelect value={this.state.option} onChange={this.handleSelectChange}>
+                        <MenuItem value={LINKS}>Get Links</MenuItem>
+                        <MenuItem value={INFO}>Get Information</MenuItem>
+                    </StyledSelect>
+                    <br/>
+                    <Button onClick={this.handleSubmit} variant="contained" color="primary">
+                        Submit
+                    </Button>
+                </form>
+            );
+        }
+        switch (this.state.option) {
+            case INFO:
+                return <MaterialInfo props={this.state.info}/>
+            default:
+                console.log("Invalid option.");
+        }
     }
 }
 
