@@ -95,7 +95,7 @@ class MaterialHome extends React.Component {
         }
         switch (this.state.option) {
             case INFO:
-                return <MaterialInfo props={this.state.info}/>
+                return <MaterialInfo info={this.state.info}/>
             default:
                 console.log("Invalid option.");
         }
