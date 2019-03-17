@@ -29,6 +29,32 @@ const StyledSelect = withStyles({
 const LINKS = 'GET_LINKS';
 const INFO = 'GET_INFORMATION';
 
+function makeRequest(method, url, data) {
+    return new Promise(function (resolve, reject) {
+            const xhr = new XMLHttpRequest();
+            xhr.open(method, url);
+            xhr.onload = function() {
+                if (this.status >= 200 && this.status < 300) {
+                    resolve({
+                        response: xhr.response
+                    });
+                } else {
+                    reject({
+                        status: this.status,
+                        statusText: xhr.statusText
+                    });
+                }
+            };
+            xhr.onerror = function() {
+                reject({
+                    status: this.status,
+                    statusText: xhr.statusText
+                });
+            };
+            xhr.send(JSON.stringify(data));
+        });
+}
+
 class MaterialHome extends React.Component {
     constructor(props) {
         super(props);
@@ -36,35 +62,30 @@ class MaterialHome extends React.Component {
         this.handleTextChange = this.handleTextChange.bind(this);
         this.handleSelectChange = this.handleSelectChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
+        this.keyPress = this.keyPress.bind(this);
     }
 
     handleSubmit(event) {
         event.preventDefault();
-        if (this.state.url === '') return;
-        const req = new XMLHttpRequest();
         switch (this.state.option) {
             case LINKS:
-                req.open('POST', 'http://127.0.0.1:3000/links');
-                req.onreadystatechange = () => {
-                    if (req.readyState === 4 && req.status === 200) {
-                        const response = JSON.parse(req.responseText);
-                        console.log(response);
-                    }
-                };
-                req.send(JSON.stringify(this.state));
-                break;
+                makeRequest('POST', 'http://127.0.0.1:3000/links', this.state)
+                    .then(responseObj => {
+                        console.log(responseObj)
+                    })
+                    .catch(err => {
+                        console.log(err);
+                    });
             case INFO:
-                req.open('POST', 'http://127.0.0.1:3000/info');
-                req.onreadystatechange = () => {
-                    if (req.readyState === 4 && req.status === 200) {
-                        const response = JSON.parse(req.responseText);
-                        this.setState({info: response});
-                        this.setState({submit: true});
-                        console.log(response);
-                    }
-                };
-                req.send(JSON.stringify(this.state));
-                break;
+                makeRequest('POST', 'http://127.0.0.1:3000/info', this.state)
+                    .then(responseObj => {
+                        const text = JSON.parse(responseObj.response);
+                        this.setState({'info': text});
+                        this.setState({'submit': true});
+                    })
+                    .catch(err => {
+                        console.log(err);
+                    });
         }
     }
     
@@ -76,11 +97,17 @@ class MaterialHome extends React.Component {
         this.setState({option: event.target.value});
     }
 
+    keyPress(event) {
+        if (event.key === 'Enter') {
+            this.handleSubmit(event);
+        }
+    }
+
     render() {
         if (!this.state.submit) {
             return (
                 <form>
-                    <StyledTextField label="URL" onChange={this.handleTextChange} fullWidth={true}/>
+                    <StyledTextField label="URL" onKeyDown={this.keyPress} onChange={this.handleTextChange} fullWidth={true}/>
                     <br/>
                     <StyledSelect value={this.state.option} onChange={this.handleSelectChange}>
                         <MenuItem value={LINKS}>Get Links</MenuItem>
