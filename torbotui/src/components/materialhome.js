@@ -67,15 +67,27 @@ class MaterialHome extends React.Component {
 
     handleSubmit(event) {
         event.preventDefault();
+        const ws = new WebSocket('ws://127.0.0.1:8080/test/ws');
+        const msg = {
+            type: LINKS,
+            url: this.state.url
+        };
         switch (this.state.option) {
             case LINKS:
+                ws.send(JSON.stringify(msg));
+                ws.onmessage = function() {
+                    debugger;
+                };
+                /*
                 makeRequest('POST', 'http://127.0.0.1:3000/links', this.state)
                     .then(responseObj => {
-                        console.log(responseObj)
+                        console.log(responseObj);
                     })
                     .catch(err => {
                         console.log(err);
                     });
+                    */
+                    break;
             case INFO:
                 makeRequest('POST', 'http://127.0.0.1:3000/info', this.state)
                     .then(responseObj => {
@@ -86,6 +98,7 @@ class MaterialHome extends React.Component {
                     .catch(err => {
                         console.log(err);
                     });
+                    break;
         }
     }
     

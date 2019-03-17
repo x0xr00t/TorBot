@@ -6,11 +6,18 @@ import (
 	"net/http"
 
 	"github.com/go-martini/martini"
+	"github.com/gorilla/websocket"
 	"github.com/martini-contrib/render"
 	"golang.org/x/net/proxy"
 )
 
 var client = createTorClient("tcp", "127.0.0.1", "9050")
+var upgrader = websocket.Upgrader{}
+
+type Message struct {
+	Link   string `json::"link"`
+	Status bool   `json::"status"`
+}
 
 func createTorClient(protocol string, address string, port string) *http.Client {
 	dialer, err := proxy.SOCKS5(protocol, address+":"+port, nil, proxy.Direct)
@@ -24,8 +31,8 @@ func createTorClient(protocol string, address string, port string) *http.Client 
 	return &http.Client{Transport: tr}
 }
 
-func getLinksHandler(req *http.Request) (int, string) {
-	return 200, "GET LINKS"
+func getLinksHandler(w http.ResponseWriter, r *http.Request) (int, string) {
+	return http.StatusOK, "GET LINKS"
 }
 
 type State struct {
@@ -48,7 +55,21 @@ func getInfoHandler(req *http.Request, r render.Render) {
 	}
 }
 
+func handleMessages() {
+
+}
+
 func main() {
+	http.HandleFunc("/test/ws", func(w http.ResponseWriter, r *http.Request) {
+		upgrader.CheckOrigin = func(r *http.Request) bool { return true }
+		conn, err := upgrader.Upgrade(w, r, nil)
+		if err != nil {
+			log.Fatalf("Error: %+v", err)
+		}
+		defer conn.Close()
+		log.Printf("Succesfully upgraded websocket connection. Connection: %+v.\n", conn)
+	})
+	go http.ListenAndServe(":8080", nil)
 	martini.Env = martini.Prod
 	m := martini.Classic()
 	m.Use(render.Renderer())
