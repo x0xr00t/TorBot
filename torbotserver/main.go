@@ -30,7 +30,13 @@ func createTorClient(protocol string, address string, port string) *http.Client 
 }
 
 func getLinksHandler(w http.ResponseWriter, r *http.Request) {
-	return
+	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Fatalf("Error: %+v", err)
+	}
+	defer conn.Close()
+	conn.WriteMessage(websocket.TextMessage, []byte("Hello World."))
 }
 
 type State struct {
@@ -60,20 +66,7 @@ func getInfoHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(json)
 }
 
-func handleMessages() {
-
-}
-
 func main() {
-	http.HandleFunc("/test/ws", func(w http.ResponseWriter, r *http.Request) {
-		upgrader.CheckOrigin = func(r *http.Request) bool { return true }
-		conn, err := upgrader.Upgrade(w, r, nil)
-		if err != nil {
-			log.Fatalf("Error: %+v", err)
-		}
-		defer conn.Close()
-		conn.WriteMessage(websocket.TextMessage, []byte("Hello World."))
-	})
 	http.HandleFunc("/links", getLinksHandler)
 	http.HandleFunc("/info", getInfoHandler)
 	log.Print("Serving on port :8080\n")

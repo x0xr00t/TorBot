@@ -55,7 +55,6 @@ function makeRequest(method, url, data) {
         });
 }
 
-
 function getInformation(state) {
     const promise = makeRequest('POST', 'http://127.0.0.1:8080/info', state)
         .then(responseObj => {
@@ -63,14 +62,13 @@ function getInformation(state) {
             return {
                 'text': text
             };
-            this.setState({'info': text});
-            this.setState({'submit': true});
         })
         .catch(err => {
             return err;
         });
     return promise; 
 }
+
 class MaterialHome extends React.Component {
     constructor(props) {
         super(props);
@@ -83,9 +81,9 @@ class MaterialHome extends React.Component {
 
     handleSubmit(event) {
         event.preventDefault();
-        const ws = new WebSocket('ws://127.0.0.1:8080/test/ws');
         switch (this.state.option) {
             case LINKS:
+                const ws = new WebSocket('ws://127.0.0.1:8080/links');
                 ws.onmessage = function(msg) {
                     debugger;
                 };
