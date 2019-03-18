@@ -78,18 +78,9 @@ class MaterialHome extends React.Component {
                 ws.onmessage = function() {
                     debugger;
                 };
-                /*
-                makeRequest('POST', 'http://127.0.0.1:3000/links', this.state)
-                    .then(responseObj => {
-                        console.log(responseObj);
-                    })
-                    .catch(err => {
-                        console.log(err);
-                    });
-                    */
-                    break;
+                break;
             case INFO:
-                makeRequest('POST', 'http://127.0.0.1:3000/info', this.state)
+                makeRequest('POST', 'http://127.0.0.1:8080/info', this.state)
                     .then(responseObj => {
                         const text = JSON.parse(responseObj.response);
                         this.setState({'info': text});

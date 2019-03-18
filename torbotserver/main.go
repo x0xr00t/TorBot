@@ -5,9 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/go-martini/martini"
 	"github.com/gorilla/websocket"
-	"github.com/martini-contrib/render"
 	"golang.org/x/net/proxy"
 )
 
@@ -31,8 +29,8 @@ func createTorClient(protocol string, address string, port string) *http.Client 
 	return &http.Client{Transport: tr}
 }
 
-func getLinksHandler(w http.ResponseWriter, r *http.Request) (int, string) {
-	return http.StatusOK, "GET LINKS"
+func getLinksHandler(w http.ResponseWriter, r *http.Request) {
+	return
 }
 
 type State struct {
@@ -40,19 +38,26 @@ type State struct {
 	Option string `json::option,omitempty`
 }
 
-func getInfoHandler(req *http.Request, r render.Render) {
+func getInfoHandler(w http.ResponseWriter, r *http.Request) {
 	currentState := new(State)
-	decoder := json.NewDecoder(req.Body)
+	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(currentState)
 	if err != nil {
 		log.Fatal(err)
 	}
 	resp, err := client.Head(currentState.Url)
+	w.Header().Set("Content-Type", "application/json")
 	if err != nil {
-		r.JSON(http.StatusInternalServerError, "Error finding url")
-	} else {
-		r.JSON(resp.StatusCode, resp.Header)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
+
+	json, err := json.Marshal(resp.Header)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(json)
 }
 
 func handleMessages() {
@@ -67,13 +72,10 @@ func main() {
 			log.Fatalf("Error: %+v", err)
 		}
 		defer conn.Close()
-		log.Printf("Succesfully upgraded websocket connection. Connection: %+v.\n", conn)
+		conn.WriteMessage(websocket.TextMessage, []byte("Hello World."))
 	})
-	go http.ListenAndServe(":8080", nil)
-	martini.Env = martini.Prod
-	m := martini.Classic()
-	m.Use(render.Renderer())
-	m.Post("/links", getLinksHandler)
-	m.Post("/info", getInfoHandler)
-	m.Run()
+	http.HandleFunc("/links", getLinksHandler)
+	http.HandleFunc("/info", getInfoHandler)
+	log.Print("Serving on port :8080\n")
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
