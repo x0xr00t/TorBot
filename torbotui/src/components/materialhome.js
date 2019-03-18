@@ -55,6 +55,22 @@ function makeRequest(method, url, data) {
         });
 }
 
+
+function getInformation(state) {
+    const promise = makeRequest('POST', 'http://127.0.0.1:8080/info', state)
+        .then(responseObj => {
+            const text = JSON.parse(responseObj.response);
+            return {
+                'text': text
+            };
+            this.setState({'info': text});
+            this.setState({'submit': true});
+        })
+        .catch(err => {
+            return err;
+        });
+    return promise; 
+}
 class MaterialHome extends React.Component {
     constructor(props) {
         super(props);
@@ -68,28 +84,22 @@ class MaterialHome extends React.Component {
     handleSubmit(event) {
         event.preventDefault();
         const ws = new WebSocket('ws://127.0.0.1:8080/test/ws');
-        const msg = {
-            type: LINKS,
-            url: this.state.url
-        };
         switch (this.state.option) {
             case LINKS:
-                ws.send(JSON.stringify(msg));
-                ws.onmessage = function() {
+                ws.onmessage = function(msg) {
                     debugger;
                 };
                 break;
             case INFO:
-                makeRequest('POST', 'http://127.0.0.1:8080/info', this.state)
-                    .then(responseObj => {
-                        const text = JSON.parse(responseObj.response);
-                        this.setState({'info': text});
+                getInformation(this.state)
+                    .then(info => {
+                        this.setState({'info': info.text});
                         this.setState({'submit': true});
                     })
                     .catch(err => {
                         console.log(err);
                     });
-                    break;
+                break;
         }
     }
     
@@ -126,7 +136,7 @@ class MaterialHome extends React.Component {
         }
         switch (this.state.option) {
             case INFO:
-                return <MaterialInfo info={this.state.info}/>
+                return <MaterialInfo info={this.state.info}/>;
             default:
                 console.log("Invalid option.");
         }
