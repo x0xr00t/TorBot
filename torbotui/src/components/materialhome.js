@@ -55,8 +55,8 @@ function makeRequest(method, url, data) {
         });
 }
 
-function getInformation(state) {
-    const promise = makeRequest('POST', 'http://127.0.0.1:8080/info', state)
+function getInformation(url) {
+    const promise = makeRequest('GET', 'http://127.0.0.1:8080/info?url=' + url)
         .then(responseObj => {
             const text = JSON.parse(responseObj.response);
             return {
@@ -83,13 +83,13 @@ class MaterialHome extends React.Component {
         event.preventDefault();
         switch (this.state.option) {
             case LINKS:
-                const ws = new WebSocket('ws://127.0.0.1:8080/links');
+                const ws = new WebSocket('ws://127.0.0.1:8080/links?url=' + encodeURIComponent(this.state.url));
                 ws.onmessage = function(msg) {
                     debugger;
                 };
                 break;
             case INFO:
-                getInformation(this.state)
+                getInformation(this.state.url)
                     .then(info => {
                         this.setState({'info': info.text});
                         this.setState({'submit': true});

@@ -12,11 +12,6 @@ import (
 var client = createTorClient("tcp", "127.0.0.1", "9050")
 var upgrader = websocket.Upgrader{}
 
-type Message struct {
-	Link   string `json::"link"`
-	Status bool   `json::"status"`
-}
-
 func createTorClient(protocol string, address string, port string) *http.Client {
 	dialer, err := proxy.SOCKS5(protocol, address+":"+port, nil, proxy.Direct)
 	if err != nil {
@@ -36,22 +31,16 @@ func getLinksHandler(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("Error: %+v", err)
 	}
 	defer conn.Close()
+	log.Printf("Query Parameters: %+v\n", r.URL.Query())
 	conn.WriteMessage(websocket.TextMessage, []byte("Hello World."))
 }
 
-type State struct {
-	Url    string `json::url`
-	Option string `json::option,omitempty`
-}
-
 func getInfoHandler(w http.ResponseWriter, r *http.Request) {
-	currentState := new(State)
-	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(currentState)
-	if err != nil {
-		log.Fatal(err)
+	urls := r.URL.Query()["url"]
+	if len(urls) == 0 || urls[0] == "" {
+		http.Error(w, "No url passed", http.StatusBadRequest)
 	}
-	resp, err := client.Head(currentState.Url)
+	resp, err := client.Head(urls[0])
 	w.Header().Set("Content-Type", "application/json")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
