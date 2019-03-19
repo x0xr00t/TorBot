@@ -1,11 +1,11 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import { withStyles } from '@material-ui/core/styles';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
-import MaterialInfo from './materialinfo.js';
+import MaterialInfo from './materialinfo';
+import MaterialLinks from './materiallinks';
 import './materialhome.css';
 
 const StyledTextField = withStyles({
@@ -83,10 +83,7 @@ class MaterialHome extends React.Component {
         event.preventDefault();
         switch (this.state.option) {
             case LINKS:
-                const ws = new WebSocket('ws://127.0.0.1:8080/links?url=' + encodeURIComponent(this.state.url));
-                ws.onmessage = function(msg) {
-                    debugger;
-                };
+                this.setState({'submit': true});
                 break;
             case INFO:
                 getInformation(this.state.url)
@@ -135,6 +132,8 @@ class MaterialHome extends React.Component {
         switch (this.state.option) {
             case INFO:
                 return <MaterialInfo info={this.state.info}/>;
+            case LINKS:
+                return <MaterialLinks url={this.state.url}/>;
             default:
                 console.log("Invalid option.");
         }
