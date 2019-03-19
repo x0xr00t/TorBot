@@ -19,12 +19,12 @@ class MaterialLinks extends React.Component {
         super(props);
         this.state = {linkStatus: []};
         this.state.linkStatus.push(createRow('http://www.google.com', 'GOOD'));
-        ws = new WebSocket('ws://127.0.0.1/links?url=' + encodeURIComponent(props.url));
+        ws = new WebSocket('ws://127.0.0.1:8080/links?url=' + encodeURIComponent(props.url));
         ws.onmessage = this.handleMessage.bind(this); 
     }
 
     handleMessage(msg) {
-        
+        console.log(msg);    
     }
 
     render() {

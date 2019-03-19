@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"log"
 	"net/http"
 
@@ -31,7 +32,19 @@ func getLinksHandler(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("Error: %+v", err)
 	}
 	defer conn.Close()
-	log.Printf("Query Parameters: %+v\n", r.URL.Query())
+	url := r.URL.Query().Get("url")
+	log.Printf("URL is %+v", url)
+	resp, err := client.Get(url)
+	if err != nil {
+		log.Fatalf("Error: %+v", err)
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalf("Error: %+v", err)
+	}
+	bodyStr := string(body)
+	log.Printf("Response Body: %+v", bodyStr)
 	conn.WriteMessage(websocket.TextMessage, []byte("Hello World."))
 }
 
