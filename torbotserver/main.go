@@ -33,7 +33,6 @@ func getLinksHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close()
 	url := r.URL.Query().Get("url")
-	log.Printf("URL is %+v", url)
 	resp, err := client.Get(url)
 	if err != nil {
 		log.Fatalf("Error: %+v", err)
@@ -49,11 +48,8 @@ func getLinksHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func getInfoHandler(w http.ResponseWriter, r *http.Request) {
-	urls := r.URL.Query()["url"]
-	if len(urls) == 0 || urls[0] == "" {
-		http.Error(w, "No url passed", http.StatusBadRequest)
-	}
-	resp, err := client.Head(urls[0])
+	url := r.URL.Query().Get("url")
+	resp, err := client.Head(url)
 	w.Header().Set("Content-Type", "application/json")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
